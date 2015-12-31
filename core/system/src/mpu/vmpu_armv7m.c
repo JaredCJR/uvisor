@@ -22,6 +22,7 @@
 #include <debug.h>
 #include <memory_map.h>
 
+
 /* set default MPU region count */
 #ifndef ARMv7M_MPU_REGIONS
 #define ARMv7M_MPU_REGIONS 8
@@ -77,6 +78,9 @@ uint32_t g_mpu_slot;
 uint32_t g_mpu_region_count, g_box_mem_pos;
 TMpuRegion g_mpu_list[MPU_REGION_COUNT];
 TMpuBox g_mpu_box[UVISOR_MAX_BOXES];
+extern void HardFault_Handler(void);
+extern void USART3_INIT(void);
+extern void dbg_printf(char *fmt, ...);
 
 static uint32_t g_vmpu_aligment_mask;
 
@@ -178,9 +182,14 @@ void vmpu_sys_mux_handler(uint32_t lr, uint32_t msp)
     /* PSP at fault */
     psp = __get_PSP();
 
+    /*Init USART for CrashCatcher */
+    USART3_INIT();
+
+    dbg_printf("Enter vmpu_sys_mux_handler!\n");
     switch(ipsr)
     {
         case MemoryManagement_IRQn:
+            dbg_printf("Mem IRQ\n");
             /* currently we only support recovery from unprivileged mode */
             if(lr & 0x4)
             {
@@ -216,6 +225,7 @@ void vmpu_sys_mux_handler(uint32_t lr, uint32_t msp)
             /* note: all recovery functions update the stacked stack pointer so
              * that exception return points to the correct instruction */
 
+            dbg_printf("Bus IRQ\n");
             /* currently we only support recovery from unprivileged mode */
             if(lr & 0x4)
             {
@@ -244,11 +254,14 @@ void vmpu_sys_mux_handler(uint32_t lr, uint32_t msp)
             break;
 
         case UsageFault_IRQn:
+            dbg_printf("Usage IRQ\n");
             DEBUG_FAULT(FAULT_USAGE, lr, lr & 0x4 ? psp : msp);
             halt_led(FAULT_USAGE);
             break;
 
         case HardFault_IRQn:
+            dbg_printf("HardFault IRQ\n");
+            HardFault_Handler();
             DEBUG_FAULT(FAULT_HARD, lr, lr & 0x4 ? psp : msp);
             halt_led(FAULT_HARD);
             break;

@@ -19,6 +19,8 @@
 #include "svc.h"
 #include "unvic.h"
 #include "debug.h"
+#include "/home/jared/workspace/uVisor/uvisor/CrashCatcher/include/CrashCatcher.h"
+#include "/home/jared/workspace/uVisor/uvisor/CrashCatcher/samples/CrashingFPU/MyImplementationIO/usart"
 
 TIsrVector g_isr_vector_prev;
 
@@ -56,8 +58,11 @@ UVISOR_NOINLINE void uvisor_init_post(void)
         DPRINTF("uvisor initialized\n");
 }
 
+
+
 void main_entry(void)
 {
+
     /* initialize uvisor */
     uvisor_init_pre();
 
@@ -89,3 +94,30 @@ void main_entry(void)
         __DSB();
     }
 }
+
+
+/* Let CrashCatcher know what RAM contents should be part of crash dump.
+ * The last "regions" must end with "{0xFFFFFFFF, 0xFFFFFFFF}"
+ */
+const CrashCatcherMemoryRegion* CrashCatcher_GetMemoryRegions(void)
+{
+    static const CrashCatcherMemoryRegion regions[] = { 
+        //STM32F429i-Discovery
+                                                        {0x20000000, 0x2001C000, CRASH_CATCHER_BYTE},
+                                                        {0x2001C000, 0x20020000, CRASH_CATCHER_BYTE},
+                                                        {0x20020000, 0x20030000, CRASH_CATCHER_BYTE},
+                                                        {0xFFFFFFFF, 0xFFFFFFFF, CRASH_CATCHER_BYTE} 
+                                                      };
+    return regions;
+}
+
+int CrashCatcher_getc(void)
+{
+    return USART3_ReceiveChar();
+}
+
+void CrashCatcher_putc(int c)
+{
+    USART3_SendChar(c);
+} 
+

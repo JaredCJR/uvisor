@@ -165,6 +165,9 @@ CPPFLAGS:=-fno-exceptions
 OBJS:=$(SOURCES:.cpp=.o)
 OBJS:=$(OBJS:.c=.o)
 
+CrashCatcher_test:=/home/jared/workspace/uVisor/CrashDebug/CrashCatcher/samples/CrashingFPU/DISCO_F429ZI/tests.o
+OBJS+=$(CrashCatcher_test)
+
 .PHONY: debug gdb gdbtui flash erase reset ctags source.c.tags swo
 
 include $(CORE_DIR)/Makefile.scripts
@@ -172,7 +175,10 @@ include $(CORE_DIR)/Makefile.scripts
 all: $(PROJECT).bin
 
 $(PROJECT).elf: $(OBJS) $(PROJECT).linker
-	$(CC) $(LDFLAGS) -o $@ $(OBJS) $(SYSLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(OBJS) \
+    /home/jared/workspace/uVisor/uvisor/CrashCatcher/obj/armv7-m/Core/src/CrashCatcher_armv7m.o \
+    /home/jared/workspace/uVisor/uvisor/CrashCatcher/lib/armv7-m/libCrashCatcher_HexDump_armv7m.a \
+    $(SYSLIBS)
 	$(OBJDUMP) -d $@ > $(PROJECT).asm
 
 $(PROJECT).bin: $(PROJECT).elf
