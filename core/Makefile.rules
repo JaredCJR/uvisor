@@ -60,6 +60,11 @@ RELEASE_INC:=$(RELEASE_DIR)/uvisor-lib
 RELEASE_OBJ:=$(RELEASE_SRC_HW)/uvisor.o
 RELEASE_VER:=$(RELEASE_SRC_HW)/version.txt
 
+# CrashCatcher specific
+CrashCatcher_ROOT_DIR:=$(ROOT_DIR)/CrashCatcher
+CrashCatcher_LIB_DIR:=$(CrashCatcher_ROOT_DIR)/lib/armv7-m/
+CrashCatcher_libraries:=$(CrashCatcher_LIB_DIR)/libCrashCatcher_HexDump_armv7m.a
+
 # make ARMv7-M MPU driver the default
 ifeq ("$(ARCH_MPU)","")
 ARCH_MPU:=ARMv7M
@@ -165,9 +170,6 @@ CPPFLAGS:=-fno-exceptions
 OBJS:=$(SOURCES:.cpp=.o)
 OBJS:=$(OBJS:.c=.o)
 
-CrashCatcher_test:=/home/jared/workspace/uVisor/CrashDebug/CrashCatcher/samples/CrashingFPU/DISCO_F429ZI/tests.o
-OBJS+=$(CrashCatcher_test)
-
 .PHONY: debug gdb gdbtui flash erase reset ctags source.c.tags swo
 
 include $(CORE_DIR)/Makefile.scripts
@@ -175,9 +177,7 @@ include $(CORE_DIR)/Makefile.scripts
 all: $(PROJECT).bin
 
 $(PROJECT).elf: $(OBJS) $(PROJECT).linker
-	$(CC) $(LDFLAGS) -o $@ $(OBJS) \
-    /home/jared/workspace/uVisor/uvisor/CrashCatcher/obj/armv7-m/Core/src/CrashCatcher_armv7m.o \
-    /home/jared/workspace/uVisor/uvisor/CrashCatcher/lib/armv7-m/libCrashCatcher_HexDump_armv7m.a \
+	$(CC) $(LDFLAGS) -o $@ $(OBJS) $(CrashCatcher_libraries) \
     $(SYSLIBS)
 	$(OBJDUMP) -d $@ > $(PROJECT).asm
 
