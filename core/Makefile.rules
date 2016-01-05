@@ -60,10 +60,23 @@ RELEASE_INC:=$(RELEASE_DIR)/uvisor-lib
 RELEASE_OBJ:=$(RELEASE_SRC_HW)/uvisor.o
 RELEASE_VER:=$(RELEASE_SRC_HW)/version.txt
 
-# CrashCatcher specific
+# CrashCatcher paths
 CrashCatcher_ROOT_DIR:=$(ROOT_DIR)/CrashCatcher
 CrashCatcher_LIB_DIR:=$(CrashCatcher_ROOT_DIR)/lib/armv7-m/
 CrashCatcher_libraries:=$(CrashCatcher_LIB_DIR)/libCrashCatcher_HexDump_armv7m.a
+
+# MRI paths
+MRI_ROOT_DIR:=$(ROOT_DIR)/mri
+MRI_LIB_DIR:=$(MRI_ROOT_DIR)/lib/armv7-m
+MRI_libraries:=$(MRI_LIB_DIR)/libmri_stm32f429-disco.a
+
+# MRI variable
+MRI_ENABLE?=1
+DEVICE_MRI_ENABLE:=$(MRI_ENABLE)
+MRI_BREAK_ON_INIT?=0
+MRI_UART?=MRI_UART_2
+MRI_INIT_PARAMETERS?=$(MRI_UART)
+
 
 # make ARMv7-M MPU driver the default
 ifeq ("$(ARCH_MPU)","")
@@ -167,6 +180,11 @@ CFLAGS_PRE:=\
 CFLAGS:=$(FLAGS_CM4) $(CFLAGS_PRE)
 CPPFLAGS:=-fno-exceptions
 
+MRI_FLAGS:=\
+        -DMRI_ENABLE=$(DEVICE_MRI_ENABLE) \
+        -DMRI_INIT_PARAMETERS='"$(MRI_INIT_PARAMETERS)"' \
+        -DMRI_BREAK_ON_INIT=$(MRI_BREAK_ON_INIT)
+
 OBJS:=$(SOURCES:.cpp=.o)
 OBJS:=$(OBJS:.c=.o)
 
@@ -177,7 +195,9 @@ include $(CORE_DIR)/Makefile.scripts
 all: $(PROJECT).bin
 
 $(PROJECT).elf: $(OBJS) $(PROJECT).linker
-	$(CC) $(LDFLAGS) -o $@ $(OBJS) $(CrashCatcher_libraries) \
+	$(CC) $(LDFLAGS) $(MRI_FLAGS) -o $@ $(OBJS) \
+    $(CrashCatcher_libraries) \
+    $(MRI_libraries) \
     $(SYSLIBS)
 	$(OBJDUMP) -d $@ > $(PROJECT).asm
 
