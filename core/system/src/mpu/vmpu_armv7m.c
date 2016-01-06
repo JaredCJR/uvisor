@@ -78,9 +78,19 @@ uint32_t g_mpu_slot;
 uint32_t g_mpu_region_count, g_box_mem_pos;
 TMpuRegion g_mpu_list[MPU_REGION_COUNT];
 TMpuBox g_mpu_box[UVISOR_MAX_BOXES];
-extern void HardFault_Handler(void);
+
+/*CrashCatcher declaration*/
+extern void CrashCatcher_HardFault_Handler(void);
 extern void USART3_INIT(void);
 extern void dbg_printf(char *fmt, ...);
+int CrashCatcher_Init = 0;
+
+/*MRI declaration*/
+extern void MRI_HardFault_Handler(void);
+extern void MRI_MemManage_Handler(void);
+extern void MRI_BusFault_Handler(void);
+extern void MRI_UsageFault_Handler(void);
+extern void MRI_DebugMon_Handler(void);
 
 static uint32_t g_vmpu_aligment_mask;
 
@@ -183,12 +193,19 @@ void vmpu_sys_mux_handler(uint32_t lr, uint32_t msp)
     psp = __get_PSP();
 
     /*Init USART for CrashCatcher */
-    USART3_INIT();
+    if(!CrashCatcher_Init)
+    {
+        USART3_INIT();
+        CrashCatcher_Init = 1;
+    }
 
-    dbg_printf("Enter vmpu_sys_mux_handler!\n");
     switch(ipsr)
     {
         case MemoryManagement_IRQn:
+            if (MRI_ENABLE)
+            {
+                MRI_MemManage_Handler();
+            }
             dbg_printf("Mem IRQ\n");
             /* currently we only support recovery from unprivileged mode */
             if(lr & 0x4)
@@ -225,6 +242,10 @@ void vmpu_sys_mux_handler(uint32_t lr, uint32_t msp)
             /* note: all recovery functions update the stacked stack pointer so
              * that exception return points to the correct instruction */
 
+            if (MRI_ENABLE)
+            {
+                MRI_BusFault_Handler();
+            }
             dbg_printf("Bus IRQ\n");
             /* currently we only support recovery from unprivileged mode */
             if(lr & 0x4)
@@ -254,19 +275,31 @@ void vmpu_sys_mux_handler(uint32_t lr, uint32_t msp)
             break;
 
         case UsageFault_IRQn:
+            if (MRI_ENABLE)
+            {
+                MRI_UsageFault_Handler();
+            }
             dbg_printf("Usage IRQ\n");
             DEBUG_FAULT(FAULT_USAGE, lr, lr & 0x4 ? psp : msp);
             halt_led(FAULT_USAGE);
             break;
 
         case HardFault_IRQn:
+            if (MRI_ENABLE)
+            {
+                MRI_HardFault_Handler();
+            }
             dbg_printf("HardFault IRQ\n");
-            HardFault_Handler();
+            CrashCatcher_HardFault_Handler();
             DEBUG_FAULT(FAULT_HARD, lr, lr & 0x4 ? psp : msp);
             halt_led(FAULT_HARD);
             break;
 
         case DebugMonitor_IRQn:
+            if (MRI_ENABLE)
+            {
+                MRI_DebugMon_Handler();
+            }
             DEBUG_FAULT(FAULT_DEBUG, lr, lr & 0x4 ? psp : msp);
             halt_led(FAULT_DEBUG);
             break;

@@ -177,13 +177,15 @@ CFLAGS_PRE:=\
         -ffunction-sections \
         -fdata-sections
 
-CFLAGS:=$(FLAGS_CM4) $(CFLAGS_PRE)
-CPPFLAGS:=-fno-exceptions
 
 MRI_FLAGS:=\
         -DMRI_ENABLE=$(DEVICE_MRI_ENABLE) \
         -DMRI_INIT_PARAMETERS='"$(MRI_INIT_PARAMETERS)"' \
         -DMRI_BREAK_ON_INIT=$(MRI_BREAK_ON_INIT)
+
+CFLAGS:=$(FLAGS_CM4) $(CFLAGS_PRE) $(MRI_FLAGS)
+CPPFLAGS:=-fno-exceptions
+
 
 OBJS:=$(SOURCES:.cpp=.o)
 OBJS:=$(OBJS:.c=.o)
@@ -195,9 +197,9 @@ include $(CORE_DIR)/Makefile.scripts
 all: $(PROJECT).bin
 
 $(PROJECT).elf: $(OBJS) $(PROJECT).linker
-	$(CC) $(LDFLAGS) $(MRI_FLAGS) -o $@ $(OBJS) \
-    $(CrashCatcher_libraries) \
+	$(CC) $(LDFLAGS) -o $@ $(OBJS) \
     $(MRI_libraries) \
+    $(CrashCatcher_libraries) \
     $(SYSLIBS)
 	$(OBJDUMP) -d $@ > $(PROJECT).asm
 

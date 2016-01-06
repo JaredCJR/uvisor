@@ -19,8 +19,9 @@
 #include "svc.h"
 #include "unvic.h"
 #include "debug.h"
-#include "/home/jared/workspace/uVisor/uvisor/CrashCatcher/include/CrashCatcher.h"
-#include "/home/jared/workspace/uVisor/uvisor/CrashCatcher/samples/CrashingFPU/MyImplementationIO/usart"
+#include "../../../CrashCatcher/include/CrashCatcher.h"
+#include "../../../mri/include/mri.h"
+#include "../../../CrashCatcher/samples/CrashingFPU/MyImplementationIO/usart"
 
 TIsrVector g_isr_vector_prev;
 
@@ -59,9 +60,14 @@ UVISOR_NOINLINE void uvisor_init_post(void)
 }
 
 
-
 void main_entry(void)
 {
+    if (MRI_ENABLE)
+    {   
+        __mriInit(MRI_INIT_PARAMETERS);
+        if (MRI_BREAK_ON_INIT)
+            __debugbreak();
+    }   
 
     /* initialize uvisor */
     uvisor_init_pre();
