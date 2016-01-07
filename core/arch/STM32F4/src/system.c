@@ -19,6 +19,19 @@
 #include "unvic.h"
 #include "system.h"
 
+
+/* MRI relative Handler */
+/*FIXME:Let the MRI handler corresponding to the Makefile argument,the handler must be only one*/
+extern void MRI_USART1_IRQHandler(void);
+extern void MRI_USART2_IRQHandler(void);
+extern void MRI_USART3_IRQHandler(void);
+#ifdef MRI_ENABLE
+    #define USART1_IRQn_Handler MRI_USART1_IRQHandler
+    #define USART2_IRQn_Handler MRI_USART2_IRQHandler
+    #define USART3_IRQn_Handler MRI_USART3_IRQHandler
+#endif
+
+
 /* all ISRs by default are weakly linked to the default handler */
 void UVISOR_ALIAS(isr_default_sys_handler) NonMaskableInt_IRQn_Handler(void);
 void UVISOR_ALIAS(isr_default_sys_handler) HardFault_IRQn_Handler(void);
