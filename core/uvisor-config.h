@@ -17,7 +17,7 @@
 #ifndef  __UVISOR_CONFIG_H__
 
 #define UVISOR_MAGIC      0x2FE539A6
-#define UVISOR_FLASH_SIZE 0x6000
+#define UVISOR_FLASH_SIZE 0x6700
 #define UVISOR_SRAM_SIZE  0x2000
 
 #endif /*__UVISOR_CONFIG_H__*/
