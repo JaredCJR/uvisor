@@ -71,7 +71,7 @@ MRI_LIB_DIR:=$(MRI_ROOT_DIR)/lib/armv7-m
 MRI_libraries:=$(MRI_LIB_DIR)/libmri_stm32f429-disco.a
 
 # MRI variable
-MRI_ENABLE?=1
+MRI_ENABLE?=0
 DEVICE_MRI_ENABLE:=$(MRI_ENABLE)
 MRI_BREAK_ON_INIT?=0
 MRI_UART?=MRI_UART_2

@@ -194,7 +194,8 @@ void vmpu_sys_mux_handler(uint32_t lr, uint32_t msp)
     psp = __get_PSP();
 
     /*Init USART for CrashCatcher */
-    USART3_INIT();
+    //USART3_INIT();
+
     if(!CrashCatcher_Init)
     {
         //USART3_INIT();
