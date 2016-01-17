@@ -62,13 +62,14 @@ UVISOR_NOINLINE void uvisor_init_post(void)
 
 void main_entry(void)
 {
+/*
     if (MRI_ENABLE)
     {   
         __mriInit(MRI_INIT_PARAMETERS);
         if (MRI_BREAK_ON_INIT)
             __debugbreak();
     }   
-
+*/
     /* initialize uvisor */
     uvisor_init_pre();
 
