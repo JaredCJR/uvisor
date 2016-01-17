@@ -79,9 +79,11 @@ void UVISOR_ALIAS(isr_default_handler)     I2C2_EV_IRQn_Handler(void);
 void UVISOR_ALIAS(isr_default_handler)     I2C2_ER_IRQn_Handler(void);
 void UVISOR_ALIAS(isr_default_handler)     SPI1_IRQn_Handler(void);
 void UVISOR_ALIAS(isr_default_handler)     SPI2_IRQn_Handler(void);
+/*
 void UVISOR_ALIAS(isr_default_handler)     USART1_IRQn_Handler(void);
 void UVISOR_ALIAS(isr_default_handler)     USART2_IRQn_Handler(void);
 void UVISOR_ALIAS(isr_default_handler)     USART3_IRQn_Handler(void);
+*/
 void UVISOR_ALIAS(isr_default_handler)     EXTI15_10_IRQn_Handler(void);
 void UVISOR_ALIAS(isr_default_handler)     RTC_Alarm_IRQn_Handler(void);
 void UVISOR_ALIAS(isr_default_handler)     OTG_FS_WKUP_IRQn_Handler(void);
