@@ -105,6 +105,7 @@ SOURCES:=\
          $(SYSTEM_DIR)/src/unvic.c \
          $(SYSTEM_DIR)/src/system.c \
          $(SYSTEM_DIR)/src/mpu/vmpu.c \
+         $(SYSTEM_DIR)/src/mri.c \
          $(DEBUG_DIR)/src/debug.c \
          $(DEBUG_DIR)/src/memory_map.c \
          $(LIB_DIR)/printf/tfp_printf.c \

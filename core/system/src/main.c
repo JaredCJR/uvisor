@@ -19,6 +19,7 @@
 #include "svc.h"
 #include "unvic.h"
 #include "debug.h"
+#include "mri.h"
 
 TIsrVector g_isr_vector_prev;
 
@@ -77,6 +78,9 @@ void main_entry(void)
 
         /* enable IRQ's after swapping */
         __enable_irq();
+
+        /*mri initialization*/
+        __mriCortexMInit();
 
         /* finish initialization */
         uvisor_init_post();
