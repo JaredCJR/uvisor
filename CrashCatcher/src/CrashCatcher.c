@@ -39,6 +39,11 @@ static const void* uint32AddressToPointer(uint32_t address)
         return (const void*)(unsigned long)address;
 }
 
+static int areFloatingPointRegistersAutoStacked(const Object* pObject)                                                                           
+{
+    return 0 == (pObject->pExceptionRegisters->exceptionLR & LR_FLOAT);
+}
+
 static Object initStackPointers(const CrashCatcherExceptionRegisters* pExceptionRegisters) 
 {
     Object object;
@@ -49,13 +54,25 @@ static Object initStackPointers(const CrashCatcherExceptionRegisters* pException
     return object;
 }
 
+static void advanceStackPointerToValueBeforeException(Object* pObject)
+{                                                                                                                                                
+    /* Cortex-M processor always push 8 integer registers on the stack. */
+    pObject->sp += 8 * sizeof(uint32_t);
+    /* ARMv7-M processors can also push 16 single-precision floating point registers, FPSCR and a padding word. */
+    if (areFloatingPointRegistersAutoStacked(pObject))
+        pObject->sp += (16 + 1 + 1) * sizeof(uint32_t);
+    /* Cortex-M processor may also have had to force 8-byte alignment before auto stacking registers. */
+    pObject->sp |= (pObject->pSP->psr & PSR_STACK_ALIGN) ? 4 : 0;
+}
+
+
 
 void CrashCatcher_Entry(const CrashCatcherExceptionRegisters* pExceptionRegisters)
 {
     DPRINTF("\n-----*****CrashCatcher_Entry_start*****-----\n");
     
     Object object = initStackPointers(pExceptionRegisters);
-    //advanceStackPointerToValueBeforeException(&object);
+    advanceStackPointerToValueBeforeException(&object);
     //initFloatingPointFlag(&object);
 /*
     do
