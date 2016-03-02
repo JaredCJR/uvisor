@@ -21,6 +21,7 @@
 #include <halt.h>
 #include <debug.h>
 #include <memory_map.h>
+#include "../../../../CrashCatcher/inc/CrashCatcherPriv.h"
 
 /* This file contains the configuration-specific symbols. */
 #include "configurations.h"
@@ -265,6 +266,7 @@ void vmpu_sys_mux_handler(uint32_t lr, uint32_t msp)
 
                 /* if recovery was not successful, throw an error and halt */
                 DEBUG_FAULT(FAULT_BUS, lr, psp);
+                _CrashCatcher_Entry();
                 HALT_ERROR(PERMISSION_DENIED, "Access to restricted resource denied");
             }
             else

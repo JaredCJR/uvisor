@@ -81,17 +81,19 @@ typedef struct
    processor.  Unit tests can write to this buffer to simulate stack overflow. */
 extern uint32_t g_crashCatcherStack[CRASH_CATCHER_STACK_WORD_COUNT];
 
+/*The main entry point into CrashCatcher.*/
+void _CrashCatcher_Entry(void);
 
-/* The main entry point into CrashCatcher.  Is called from the HardFault exception handler and unit tests. */
-void CrashCatcher_Entry(const CrashCatcherExceptionRegisters* pExceptionRegisters);
 
 /* Called from CrashCatcher core to copy all floating point registers to supplied buffer. The supplied buffer must be
    large enough to contain 33 32-bit values (S0-S31 & FPCSR). */
-void CrashCatcher_CopyAllFloatingPointRegisters(uint32_t* pBuffer);
+//NOT implemented,FIXME
+//void CrashCatcher_CopyAllFloatingPointRegisters(uint32_t* pBuffer);
 
 /* Called from CrashCatcher core to copy upper 16 floating point registers to supplied buffer. The supplied buffer must be
    large enough to contain 16 32-bit values (S16-S31). */
-void CrashCatcher_CopyUpperFloatingPointRegisters(uint32_t* pBuffer);
+//NOT implemented,FIXME
+//void CrashCatcher_CopyUpperFloatingPointRegisters(uint32_t* pBuffer);
 
 #endif // #if !__ASSEMBLER__
 
