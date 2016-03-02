@@ -35,6 +35,7 @@ TOOLS_DIR:=$(ROOT_DIR)/tools
 # Core paths
 CMSIS_DIR:=$(CORE_DIR)/cmsis
 SYSTEM_DIR:=$(CORE_DIR)/system
+CrashCatcher_DIR:=$(ROOT_DIR)/CrashCatcher
 MBED_DIR:=$(CORE_DIR)/mbed
 DEBUG_DIR:=$(CORE_DIR)/debug
 LIB_DIR:=$(CORE_DIR)/lib
@@ -96,6 +97,7 @@ MPU_SRC:=\
 endif
 
 SOURCES:=\
+		 $(CrashCatcher_DIR)/src/CrashCatcher.c \
          $(SYSTEM_DIR)/src/benchmark.c \
          $(SYSTEM_DIR)/src/halt.c \
          $(SYSTEM_DIR)/src/main.c \
