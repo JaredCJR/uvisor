@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 #include <uvisor.h>
+#include <CrashCatcher.h>
 
 /* All system IRQs are by default weakly linked to the system default handler */
 void UVISOR_ALIAS(isr_default_sys_handler) NonMaskableInt_IRQn_Handler(void);
@@ -57,11 +58,45 @@ __attribute__((section(".isr"))) const TIsrVector g_isr_vector[ISR_VECTORS] =
 
 void UVISOR_NAKED UVISOR_NORETURN isr_default_sys_handler(void)
 {
+   /* CrashCatcher routine */
+   /* Push the following onto the stack (see CrashCatcherExceptionRegisters structure). The g_crashCatcherStack buffer
+       is reserved for use as the stack while CrashCatcher is running.
+        exceptionPSR
+        psp
+        msp
+        r4
+        r5
+        r6
+        r7
+        r8
+        r9
+        r10
+        r11
+        exceptionLR */
+    /*100 equals CRASH_CATCHER_STACK_WORD_COUNT*/
+    asm volatile(
+       "mrs     r1, xpsr\n"
+       "mrs     r2, psp\n"
+       "mrs     r3, msp\n"
+       "ldr     sp, =(0x20000000 + 4 * 100)\n"
+       "push.w  {r1-r11,lr}\n"
+
+       /*get lr*/
+       "mov     r0, lr\n"/*equal to "ldr     r0, =(g_crashCatcherStack + 4 * (100 - 0) )\n"*/
+       /*get msp*/
+       "mov     r1, r3\n"/*equal to "ldr     r1, =(g_crashCatcherStack + 4 * (100 - 9) )\n"*/
+       /*restore sp*/
+       "msr     msp, r1\n"
+    );
+
+
     /* Handle system IRQ with an unprivileged handler. */
     /* Note: The original lr and the MSP are passed to the actual handler */
     asm volatile(
+        /*
         "mov r0, lr\n"
         "mrs r1, MSP\n"
+        */
         "push {lr}\n"
         "blx vmpu_sys_mux_handler\n"
         "pop {pc}\n"
