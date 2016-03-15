@@ -73,7 +73,12 @@ void UVISOR_NAKED UVISOR_NORETURN isr_default_sys_handler(void)
         r10
         r11
         exceptionLR */
-    /*50 equals CRASH_CATCHER_STACK_WORD_COUNT*/
+
+    /* 50 equals CRASH_CATCHER_STACK_WORD_COUNT
+       exceptionLR is stored at stack[50]
+       r11         is stored at stack[49]
+       ...
+     */
     asm volatile(
         "mrs     r1, xpsr\n"
         "mrs     r2, psp\n"
@@ -153,7 +158,7 @@ The following floating point registers are only stacked when the LR_FLOAT bit is
            floats[15]
            fpscr
          */
-"CCstore:\n"
+"CCstore_auto:\n"
         /*  r2=(*r1),then r1+=4 */
         "ldr     r2, [r1], #4\n"
         /*  (*r3)=r2 */
@@ -164,12 +169,39 @@ The following floating point registers are only stacked when the LR_FLOAT bit is
         "subs    r0, r0, #1\n"
         /* if (loop_counter > 1) */
         "it      hi\n"
-        "bhi     CCstore\n"
+        "bhi     CCstore_auto\n"
         /*end of storing auto-stacked registers*/
+        );
+
+    asm volatile(
+        /*
+          Configurable Fault Status Register, CFSR
+          MemManage Status Register, MMFSR
+          BusFault Status Register, BFSR
+          UsageFault Status Register, UFSR
+          HardFault Status Register, HFSR
+        */
+        "ldr     r0, =(0xE000ED28)\n"/*Start address*/
+        /* r1 is the destination of storage*/
+        "ldr     r1, =(0x20000000 + 4 * 95 )\n"
+        /* r2 is loop counter*/
+        "mov     r2, #5\n"
+/* store to destination*/
+"CCstore_fault:\n"
+        "ldr     r3, [r0], #4\n"
+        "str     r3, [r1], #4\n"
+        /*forward to the next*/
+        //"add     r0, r0, #4\n"
+        //"add     r1, r1, #4\n"
+        "subs    r2, r2, #1\n"
+        "it      hi\n"
+        "bhi     CCstore_fault\n"
+        /*end of storing fault status registers*/
         );
 
 
 
+/*Prepare for the arguments passed to the uVisor*/
     asm volatile(
         "\n"
         /*get lr*/
