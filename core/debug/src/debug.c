@@ -318,10 +318,16 @@ uint32_t debug_get_version(void)
 
 void debug_halt_error(THaltError reason)
 {
-    /* The following arguments are passed to the destination function:
-     *   1. reason
-     * Upon return from the debug handler, the system will reboot. */
-    debug_deprivilege_and_return(g_debug_box.driver->halt_error, __debug_reboot, reason, 0, 0, 0);
+    /* If the debug box does not exist (or it has not been initialized yet),
+     * just halt. */
+    if (!g_debug_box.initialized) {
+        while(1);
+    } else {
+        /* The following arguments are passed to the destination function:
+         *   1. reason
+         * Upon return from the debug handler, the system will reboot. */
+        debug_deprivilege_and_return(g_debug_box.driver->halt_error, __debug_reboot, reason, 0, 0, 0);
+    }
 }
 
 void debug_register_driver(const TUvisorDebugDriver * const driver)
@@ -340,12 +346,19 @@ void debug_register_driver(const TUvisorDebugDriver * const driver)
 
     /* Check that the debug driver table and all its entries are in public
      * flash. */
-    if (!vmpu_flash_addr((uint32_t) driver) || !vmpu_flash_addr((uint32_t) driver + sizeof(TUvisorDebugDriver))) {
+    if (!vmpu_public_flash_addr((uint32_t) driver) ||
+        !vmpu_public_flash_addr((uint32_t) driver + sizeof(TUvisorDebugDriver))) {
         HALT_ERROR(SANITY_CHECK_FAILED, "The debug box driver struct must be stored in public flash.\n\r");
     }
+    if (!driver) {
+        HALT_ERROR(SANITY_CHECK_FAILED, "The debug box driver cannot be initialized with a NULL pointer.\r\n");
+    }
     for (i = 0; i < DEBUG_BOX_HANDLERS_NUMBER; i++) {
-        if (!vmpu_flash_addr(*((uint32_t *) driver + i))) {
+        if (!vmpu_public_flash_addr(*((uint32_t *) driver + i))) {
             HALT_ERROR(SANITY_CHECK_FAILED, "Each handler in the debug box driver struct must be stored in public flash.\n\r");
+        }
+        if (!*((uint32_t *) driver + i)) {
+            HALT_ERROR(SANITY_CHECK_FAILED, "Handlers in the debug box driver cannot be initialized with a NULL pointer.\r\n");
         }
     }
 
