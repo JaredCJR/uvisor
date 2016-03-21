@@ -10,6 +10,9 @@
 .extern pCC_Storage_autostack_top
 .global pCC_Storage_FaultStatus_top
 .extern pCC_Storage_FaultStatus_top
+.global pCC_Storage_stack_bottom
+.extern pCC_Storage_stack_bottom
+
 
 
 .text
@@ -44,10 +47,10 @@
 ccPush_unStackedRegisters:
     mrs     r1, xpsr
     mrs     r3, msp
-    ldr     r2, =pCC_Storage_autostack_top /*Due to stmdb will cross the current address,so we use "the next address of unstack storage"*/
+    ldr     r2, =pCC_Storage_stack_bottom /*Due to stmdb will cross the current address,so we use "the next address of unstack storage"*/
     ldr     sp, [r2]
     mrs     r2, psp
-    str.w   r0, [sp, #-4]!
+    str.w   r0, [sp]
     push.w  {r1-r11}
 
     bx       lr
