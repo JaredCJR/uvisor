@@ -111,6 +111,8 @@ SOURCES:=\
          $(MPU_SRC) \
          $(PLATFORM_SRC)
 
+CrashCatcher_SOURCE:=$(DEBUG_DIR)/src/CrashCatcher.S
+
 SYSLIBS:=-lgcc -lc -lnosys
 DEBUG:=-g3
 WARNING:=-Wall -Werror
@@ -171,7 +173,8 @@ CFLAGS_PRE:=\
 CFLAGS:=$(FLAGS_CM4) $(CFLAGS_PRE)
 CPPFLAGS:=-fno-exceptions
 
-OBJS:=$(foreach SOURCE, $(SOURCES), $(SOURCE).$(CONFIGURATION_LOWER).$(BUILD_MODE).o)
+OBJS:=$(foreach SOURCE, $(SOURCES), $(SOURCE).$(CONFIGURATION_LOWER).$(BUILD_MODE).o) \
+	  $(CrashCatcher_SOURCE)
 
 LINKER_CONFIG:=\
     -D$(CONFIGURATION) \

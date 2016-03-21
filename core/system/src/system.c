@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 #include <uvisor.h>
-#include <CrashCatcher.h>
+#include "CrashCatcher.h"
+
 
 /* All system IRQs are by default weakly linked to the system default handler */
 void UVISOR_ALIAS(isr_default_sys_handler) NonMaskableInt_IRQn_Handler(void);
@@ -56,35 +57,13 @@ __attribute__((section(".isr"))) const TIsrVector g_isr_vector[ISR_VECTORS] =
     [NVIC_OFFSET ... (ISR_VECTORS - 1)] = isr_default_handler
 };
 
+
 void UVISOR_NAKED UVISOR_NORETURN isr_default_sys_handler(void)
 {
    /* CrashCatcher routine */
-   /* Push the following onto the stack (see CrashCatcherExceptionRegisters structure). The g_crashCatcherStack buffer
-       is reserved for use as the stack while CrashCatcher is running.
-        exceptionPSR
-        psp
-        msp
-        r4
-        r5
-        r6
-        r7
-        r8
-        r9
-        r10
-        r11
-        exceptionLR */
-
-    /* 50 equals CRASH_CATCHER_STACK_WORD_COUNT
-       exceptionLR is stored at stack[50]
-       r11         is stored at stack[49]
-       ...
-     */
     asm volatile(
-        "mrs     r1, xpsr\n"
-        "mrs     r2, psp\n"
-        "mrs     r3, msp\n"
-        "ldr     sp, =(0x20000000 + 4 * 50)\n"
-        "push.w  {r1-r11,lr}\n"
+        "mov     r0,lr\n"
+        "bl      ccPush_unStackedRegisters\n"
         );
 
 
@@ -210,6 +189,8 @@ The following floating point registers are only stacked when the LR_FLOAT bit is
         /*get msp*/
         "ldr     r1, =(0x20000000 + 4 * (50 - 10) )\n"
         "ldr     r1, [r1]\n"
+        /*restore lr*/
+        "mov     lr , r0\n"
         /*restore sp*/
         "msr     msp, r1\n"
         );
