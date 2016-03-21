@@ -11,12 +11,11 @@
 #include <uvisor.h>
 
 
-void ccPush_unStackedRegisters(uint32_t para);
-
 uint32_t pCC_Storage_stack_lr  = (uint32_t)(0x20000000 + 4 * (50 - 1) );
 uint32_t pCC_Storage_stack_psp = (uint32_t)(0x20000000 + 4 * (50 - 11) );
 uint32_t pCC_Storage_stack_msp = (uint32_t)(0x20000000 + 4 * (50 - 10) );
 uint32_t pCC_Storage_autostack_top = (uint32_t)(0x20000000+ 4 * 50);
+uint32_t pCC_Storage_FaultStatus_top = (uint32_t)(0x20000000 + 4 * 95 );
 
 
 #endif // #if !__ASSEMBLER__

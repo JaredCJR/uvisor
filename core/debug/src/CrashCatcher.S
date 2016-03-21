@@ -8,6 +8,9 @@
 .extern pCC_Storage_stack_msp
 .global pCC_Storage_autostack_top
 .extern pCC_Storage_autostack_top
+.global pCC_Storage_FaultStatus_top
+.extern pCC_Storage_FaultStatus_top
+
 
 
 .text
@@ -147,6 +150,41 @@ CCstore_auto:
 
 
 
+
+
+.global ccPush_FaultStatusRegisters
+.type ccPush_FaultStatusRegisters, %function
+.thumb_func
+ccPush_FaultStatusRegisters:
+
+/*
+    Configurable Fault Status Register, CFSR
+    MemManage Status Register, MMFSR
+    BusFault Status Register, BFSR
+    UsageFault Status Register, UFSR
+    HardFault Status Register, HFSR
+*/
+    ldr     r0, =(0xE000ED28)                  /*FaultStatus registers Start address*/
+    //ldr     r1, =pCC_Storage_FaultStatus_top   /* r1 is the destination of storage*/
+    //ldr     r1, [r1]
+    ldr     r1, =(0x20000000 + 4 * 95 )
+    mov     r2, #5                             /* r2 is loop counter*/
+
+/* store to destination*/
+CCstore_fault:
+    /*store and forward to the next*/                                                                                             
+    ldr     r3, [r0], #4
+    str     r3, [r1], #4
+
+    subs    r2, r2, #1
+    it      hi
+    bhi     CCstore_fault
+
+/*end of storing fault status registers*/
+    bx      lr
+/* Let assembler know that we have hit the end of the function.*/
+.pool
+.size   ccPush_FaultStatusRegisters, .-ccPush_FaultStatusRegisters
 
 
 

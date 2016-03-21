@@ -65,34 +65,7 @@ void UVISOR_NAKED UVISOR_NORETURN isr_default_sys_handler(void)
         "mov     r0,lr\n"
         "bl      ccPush_unStackedRegisters\n"
         "bl      ccPush_autoStackedRegisters\n"
-        );
-
-
-
-    asm volatile(
-        /*
-          Configurable Fault Status Register, CFSR
-          MemManage Status Register, MMFSR
-          BusFault Status Register, BFSR
-          UsageFault Status Register, UFSR
-          HardFault Status Register, HFSR
-        */
-        "ldr     r0, =(0xE000ED28)\n"/*Start address*/
-        /* r1 is the destination of storage*/
-        "ldr     r1, =(0x20000000 + 4 * 95 )\n"
-        /* r2 is loop counter*/
-        "mov     r2, #5\n"
-/* store to destination*/
-"CCstore_fault:\n"
-        "ldr     r3, [r0], #4\n"
-        "str     r3, [r1], #4\n"
-        /*forward to the next*/
-        //"add     r0, r0, #4\n"
-        //"add     r1, r1, #4\n"
-        "subs    r2, r2, #1\n"
-        "it      hi\n"
-        "bhi     CCstore_fault\n"
-        /*end of storing fault status registers*/
+        "bl      ccPush_FaultStatusRegisters\n"
         );
 
 
