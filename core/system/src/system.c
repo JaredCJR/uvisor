@@ -64,93 +64,10 @@ void UVISOR_NAKED UVISOR_NORETURN isr_default_sys_handler(void)
     asm volatile(
         "mov     r0,lr\n"
         "bl      ccPush_unStackedRegisters\n"
+        "bl      ccPush_autoStackedRegisters\n"
         );
 
 
-    /*Save the auto-stacked registers to be accessed by CrashCatcher
-        r0
-        r1
-        r2
-        r3
-        r12
-        lr
-        pc
-        psr
-The following floating point registers are only stacked when the LR_FLOAT bit is set in exceptionLR.
-        floats[16]
-        fpscr
-        reserved //for 8-bytes alignments
-     */
-    asm volatile(
-
-        /*test for whether using FPU*/
-        /*read Coprocessor Access Control Register*/
-        "ldr     r1, =( 0xE000ED88 )\n"
-        "ldr     r1, [r1]\n"
-        /*r0 (after shift) represents for coProcessor10and11EnabledBits*/
-        "mov     r0, #5\n"
-        /*Decide auto-stacked size*/
-        "lsl     r0, r0, #20\n"
-        "teq     r1, r0\n"
-        "ite     eq\n"
-        "moveq   r0, #25\n"
-        "movne   r0, #8\n"
-
-
-        /*get lr*/
-        "ldr     r1, =(0x20000000 + 4 * (50 - 1) )\n"
-        "ldr     r1, [r1]\n"
-        /*test for using msp or psp*/
-        "ands    r1, r1, 0x4\n"                               
-        "cmp     r1, 0x4\n"
-        "ite     eq\n"
-        /*using psp,previously */
-        "ldreq   r1, =(0x20000000 + 4 * (50 - 11) )\n"
-        /*using msp,previously*/
-        "ldrne   r1, =(0x20000000 + 4 * (50 - 10) )\n"
-
-        "ldr     r1, [r1]\n"
-
-        /*get the address of auto_stack[0]*/
-        //"mov     r3, (0x20000000 + (4 * (50)) )\n",due to the format,the general registers are not able to operate on such big number at once.
-        "mov     r3, #2\n"
-        "lsl     r3, r3, #28\n"/*  r3=0x20000000  */
-        "mov     r2, #50\n"    /*  r2=50,the index of auto_stack[0] */
-        "lsl     r2, r2, #2\n" /*  r2=r2*4  */
-        "add     r3, r3, r2\n" /*  r3=0x20000000+50*4 */
-
-        /*store auto-stacked registers to g_crashCatcherStack*/
-        /*r0 is the stack size(loop_counter) that we need to store*/
-        /*r1 is the (sp_address) that we used*/
-        /*r3 is the address of auto_stack[i]*/
-        /* 
-           auto_stack[0] = r0
-           auto_stack[1] = r1
-           auto_stack[2] = r2
-           auto_stack[3] = r3
-           auto_stack[4] = r12
-           auto_stack[5] = lr
-           auto_stack[6] = pc
-           auto_stack[7] = psr
-           floats[0]
-           ...
-           floats[15]
-           fpscr
-         */
-"CCstore_auto:\n"
-        /*  r2=(*r1),then r1+=4 */
-        "ldr     r2, [r1], #4\n"
-        /*  (*r3)=r2 */
-        "str     r2, [r3]\n"
-        /*  r3=r3+4  */
-        "add     r3, r3, #4\n"
-        /* loop_counter-=1 */
-        "subs    r0, r0, #1\n"
-        /* if (loop_counter > 1) */
-        "it      hi\n"
-        "bhi     CCstore_auto\n"
-        /*end of storing auto-stacked registers*/
-        );
 
     asm volatile(
         /*
