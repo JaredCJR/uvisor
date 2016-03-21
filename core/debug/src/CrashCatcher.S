@@ -12,7 +12,6 @@
 .extern pCC_Storage_FaultStatus_top
 
 
-
 .text
 .syntax unified
 .arch armv7-m
@@ -186,6 +185,28 @@ CCstore_fault:
 .pool
 .size   ccPush_FaultStatusRegisters, .-ccPush_FaultStatusRegisters
 
+
+
+
+
+.global ccPush_ProcedureCleanUp
+.type ccPush_ProcedureCleanUp , %function
+.thumb_func
+ccPush_ProcedureCleanUp:
+    /*get lr*/
+    ldr     r0, =pCC_Storage_stack_lr
+    ldr     r0, [r0]
+    ldr     r0, [r0]
+
+    /*get msp*/                                                                                                                              
+    ldr     r1, =pCC_Storage_stack_msp
+    ldr     r1, [r1]
+    ldr     r1, [r1]
+
+    bx      lr
+/* Let assembler know that we have hit the end of the function.*/
+.pool
+.size   ccPush_ProcedureCleanUp , .-ccPush_ProcedureCleanUp 
 
 
 

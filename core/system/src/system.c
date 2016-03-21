@@ -60,7 +60,7 @@ __attribute__((section(".isr"))) const TIsrVector g_isr_vector[ISR_VECTORS] =
 
 void UVISOR_NAKED UVISOR_NORETURN isr_default_sys_handler(void)
 {
-   /* CrashCatcher routine */
+    /* CrashCatcher routine */
     asm volatile(
         "mov     r0,lr\n"
         "bl      ccPush_unStackedRegisters\n"
@@ -68,23 +68,14 @@ void UVISOR_NAKED UVISOR_NORETURN isr_default_sys_handler(void)
         "bl      ccPush_FaultStatusRegisters\n"
         );
 
-
-
-/*Prepare for the arguments passed to the uVisor*/
+    /*Prepare for the arguments passed to the uVisor*/
     asm volatile(
-        "\n"
-        /*get lr*/
-        "ldr     r0, =(0x20000000 + 4 * (50 - 1) )\n"
-        "ldr     r0, [r0]\n"
-        /*get msp*/
-        "ldr     r1, =(0x20000000 + 4 * (50 - 10) )\n"
-        "ldr     r1, [r1]\n"
+        "bl      ccPush_ProcedureCleanUp\n"
         /*restore lr*/
         "mov     lr , r0\n"
         /*restore sp*/
         "msr     msp, r1\n"
         );
-
 
     /* Handle system IRQ with an unprivileged handler. */
     /* Note: The original lr and the MSP are passed to the actual handler */
