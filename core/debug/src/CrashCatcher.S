@@ -163,9 +163,8 @@ ccPush_FaultStatusRegisters:
     HardFault Status Register, HFSR
 */
     ldr     r0, =(0xE000ED28)                  /*FaultStatus registers Start address*/
-    //ldr     r1, =pCC_Storage_FaultStatus_top   /* r1 is the destination of storage*/
-    //ldr     r1, [r1]
-    ldr     r1, =(0x20000000 + 4 * 95 )
+    ldr     r1, =pCC_Storage_FaultStatus_top   /* r1 is the destination of storage*/
+    ldr     r1, [r1]
     mov     r2, #5                             /* r2 is loop counter*/
 
 /* store to destination*/
