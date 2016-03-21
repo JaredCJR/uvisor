@@ -112,7 +112,6 @@ ccPush_autoStackedRegisters:
     /*get the address of auto_stack[0]*/
     ldr     r3, =pCC_Storage_autostack_top
     ldr     r3, [r3]
-    ldr     r3, [r3]
 
 /*
     r0 is the stack size(loop_counter) that we need to store
