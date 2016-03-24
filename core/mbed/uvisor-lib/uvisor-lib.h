@@ -30,6 +30,7 @@
 #include "uvisor-lib/svc_exports.h"
 #include "uvisor-lib/svc_gw_exports.h"
 #include "uvisor-lib/unvic_exports.h"
+#include "uvisor-lib/CrashCatcher.h"
 
 /* conditionally included header files */
 #if YOTTA_CFG_UVISOR_PRESENT == 1

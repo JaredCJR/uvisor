@@ -48,6 +48,34 @@ void debug_register_driver(const TUvisorDebugDriver * const driver);
 uint32_t debug_get_version(void);
 void debug_halt_error(THaltError reason);
 void debug_reboot(void);
+void CrashCatcher_INIT(uint32_t base);
+
+/*CrashCatcher storage global variable*/
+UVISOR_EXTERN uint32_t __CrashCatcher_BASE__;/*Linker Script symbol*/
+UVISOR_EXTERN uint32_t pCC_Base;
+#define  pCC_Storage_Base    (uint32_t)0x20000000/*default base address,avoid cause fault*/
+UVISOR_EXTERN uint32_t pCC_Storage_stack_bottom;                                                                                                                      
+UVISOR_EXTERN uint32_t pCC_Storage_stack_lr;
+UVISOR_EXTERN uint32_t pCC_Storage_stack_psp;
+UVISOR_EXTERN uint32_t pCC_Storage_stack_msp;
+UVISOR_EXTERN uint32_t pCC_Storage_autostack_top;
+UVISOR_EXTERN uint32_t pCC_Storage_FaultStatus_top;
+
+
+/*Need to be as same as the uvisor-helloworld CrashCatcher header file*/
+#define CRASH_CATCHER_STACK_WORD_COUNT 50
+#define CRASH_CATCHER_AUTO_STACKED_WORD_COUNT 45
+#define CRASH_CATCHER_FAULT_REGISTERS_WORD_COUNT 5
+#define  CC_WORD_SIZE        4
+                                                                                                                                                                      
+#define pCC_register_stack_bottom(BASE)       (uint32_t)(BASE + CC_WORD_SIZE * (CRASH_CATCHER_STACK_WORD_COUNT - 1))
+#define pCC_register_lr(BASE)                 (uint32_t)pCC_register_stack_bottom(BASE)
+#define pCC_register_psp(BASE)                (uint32_t)(BASE + CC_WORD_SIZE * (CRASH_CATCHER_STACK_WORD_COUNT - 11))
+#define pCC_register_msp(BASE)                (uint32_t)(BASE + CC_WORD_SIZE * (CRASH_CATCHER_STACK_WORD_COUNT - 10))
+#define pCC_register_autostack_top(BASE)      (uint32_t)(BASE + CC_WORD_SIZE * CRASH_CATCHER_STACK_WORD_COUNT )
+#define pCC_register_FaultStatus_top(BASE)    (uint32_t)(BASE + CC_WORD_SIZE * (CRASH_CATCHER_STACK_WORD_COUNT + CRASH_CATCHER_AUTO_STACKED_WORD_COUNT) )
+
+
 
 #define DEBUG_PRINT_HEAD(x) {\
     DPRINTF("\n***********************************************************\n");\

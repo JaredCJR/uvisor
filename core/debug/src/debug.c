@@ -27,6 +27,14 @@
 uint8_t g_buffer[DEBUG_MAX_BUFFER];
 int g_buffer_pos;
 
+uint32_t pCC_Base = (uint32_t)&__CrashCatcher_BASE__;
+uint32_t pCC_Storage_stack_bottom    = pCC_register_stack_bottom(pCC_Storage_Base);
+uint32_t pCC_Storage_stack_lr        = pCC_register_lr(pCC_Storage_Base);
+uint32_t pCC_Storage_stack_psp       = pCC_register_psp(pCC_Storage_Base);
+uint32_t pCC_Storage_stack_msp       = pCC_register_msp(pCC_Storage_Base);
+uint32_t pCC_Storage_autostack_top   = pCC_register_autostack_top(pCC_Storage_Base);
+uint32_t pCC_Storage_FaultStatus_top = pCC_register_FaultStatus_top(pCC_Storage_Base);
+
 #ifndef CHANNEL_DEBUG
 void default_putc(uint8_t data)
 {
@@ -330,6 +338,17 @@ void debug_halt_error(THaltError reason)
     }
 }
 
+void CrashCatcher_INIT(uint32_t base)
+{
+    pCC_Storage_stack_bottom    = pCC_register_stack_bottom(base);
+    pCC_Storage_stack_lr        = pCC_register_lr(base);
+    pCC_Storage_stack_psp       = pCC_register_psp(base);
+    pCC_Storage_stack_msp       = pCC_register_msp(base);
+    pCC_Storage_autostack_top   = pCC_register_autostack_top(base);
+    pCC_Storage_FaultStatus_top = pCC_register_FaultStatus_top(base);
+}
+
+
 void debug_register_driver(const TUvisorDebugDriver * const driver)
 {
     int i;
@@ -361,6 +380,9 @@ void debug_register_driver(const TUvisorDebugDriver * const driver)
             HALT_ERROR(SANITY_CHECK_FAILED, "Handlers in the debug box driver cannot be initialized with a NULL pointer.\r\n");
         }
     }
+
+    /*CrashCatcher storage Initialization*/
+    CrashCatcher_INIT(pCC_Storage_Base);
 
     /* Register the debug box.
      * The caller of this function is considered the owner of the debug box. */

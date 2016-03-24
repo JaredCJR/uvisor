@@ -1,4 +1,3 @@
-#include "../inc/CrashCatcher.h"
 
 .global pCC_Storage_stack_lr
 .extern pCC_Storage_stack_lr

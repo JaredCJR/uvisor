@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 #include <uvisor.h>
-#include "CrashCatcher.h"
 
 
 /* All system IRQs are by default weakly linked to the system default handler */
